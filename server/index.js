@@ -9,7 +9,7 @@ const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
 app.use(
   cors({
-    origin: [CLIENT_ORIGIN, "http://localhost:3000"],
+    origin: [CLIENT_ORIGIN, "http://localhost:3000", "https://pern-todo-app-82b2.onrender.com"],
   })
 );
 app.use(express.json());
