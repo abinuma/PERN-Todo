@@ -15,7 +15,7 @@ const EditTodo = ({ todo, onUpdated }) => {
     try {
       const body = { description };
       await fetch(
-        `${import.meta.env.VITE_API_URL ?? "http://localhost:5000"}/todos/${todo.todo_id}`,
+        `${import.meta.env.VITE_API_URL}/todos/${todo.todo_id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

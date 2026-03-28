@@ -9,7 +9,7 @@ const InputTodo = ({ onTodoAdded }) => {
     try {
       const body = { description };
       await fetch(
-        `${import.meta.env.VITE_API_URL ?? "http://localhost:5000"}/todos`,
+        `${import.meta.env.VITE_API_URL}/todos`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

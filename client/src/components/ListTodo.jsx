@@ -5,7 +5,7 @@ const ListTodos = ({ todos, refreshTodos }) => {
   const deleteTodo = async (id) => {
     try {
       await fetch(
-        `${import.meta.env.VITE_API_URL ?? "http://localhost:5000"}/todos/${id}`,
+        `${import.meta.env.VITE_API_URL}/todos/${id}`,
         {
           method: "DELETE",
         }

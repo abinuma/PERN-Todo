@@ -8,7 +8,7 @@ export default function App() {
   const getTodos = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL ?? "http://localhost:5000"}/todos`
+        `${import.meta.env.VITE_API_URL}/todos`
       );
       const jsonData = await response.json();
       setTodos(jsonData);
