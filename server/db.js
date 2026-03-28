@@ -7,3 +7,13 @@ const pool = new Pool({
 });
 
 export default pool;
+
+// Log successful connection
+pool.on('connect', () => {
+  console.log('✅ PostgreSQL pool connected');
+});
+
+// Log any pool error
+pool.on('error', (err) => {
+  console.error('❌ Unexpected pool error:', err);
+});

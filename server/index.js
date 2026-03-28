@@ -14,26 +14,48 @@ app.use(
 );
 app.use(express.json());
 
+// Request logger
+app.use((req, res, next) => {
+  console.log(`\n[${new Date().toISOString()}] ${req.method} request to ${req.url}`);
+  console.log(`Headers Origin:`, req.headers.origin);
+  next();
+});
+
 app.get("/health", async (_req, res) => {
   res.json({ ok: true });
 });
 
-app.post("/todos", async (req, res) => {
+app.post("/todos", async (req, res, next) => {
+  console.log("➡️ POST /todos received body:", req.body);
   const description = req.body?.description?.trim();
   if (!description) {
+    console.warn("⚠️ Description is missing in request!");
     return res.status(400).json({ error: "Description is required." });
   }
 
-  const newTodo = await pool.query(
-    "INSERT INTO todo (description) VALUES($1) RETURNING *",
-    [description]
-  );
-  return res.status(201).json(newTodo.rows[0]);
+  try {
+    const newTodo = await pool.query(
+      "INSERT INTO todo (description) VALUES($1) RETURNING *",
+      [description]
+    );
+    console.log("✅ Successfully inserted into DB:", newTodo.rows[0]);
+    return res.status(201).json(newTodo.rows[0]);
+  } catch (err) {
+    console.error("❌ DB Insert Failed in POST /todos:", err);
+    next(err);
+  }
 });
 
-app.get("/todos", async (_req, res) => {
-  const allTodos = await pool.query("SELECT * FROM todo ORDER BY todo_id DESC");
-  return res.json(allTodos.rows);
+app.get("/todos", async (_req, res, next) => {
+  console.log("➡️ Attempting to query DB for all todos...");
+  try {
+    const allTodos = await pool.query("SELECT * FROM todo ORDER BY todo_id DESC");
+    console.log(`✅ Successfully fetched ${allTodos.rows.length} todos from DB.`);
+    return res.json(allTodos.rows);
+  } catch (err) {
+    console.error("❌ DB Query Failed in GET /todos:", err);
+    next(err);
+  }
 });
 
 app.get("/todos/:id", async (req, res) => {
