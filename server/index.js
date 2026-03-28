@@ -4,27 +4,17 @@ import cors from "cors";
 import pool from "./db.js";
 
 const app = express();
-const PORT = Number(process.env.PORT || 5000);
+const PORT = process.env.PORT || 5000;
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_ORIGIN || "http://localhost:5173", 
-      "http://localhost:3000", 
-      "https://pern-todo-app-82b2.onrender.com"
-    ],
+    origin: process.env.CLIENT_ORIGIN,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true
   })
 );
 app.use(express.json());
-
-// Request logger (moved before cors? actually keep after, but OPTIONS will be handled before)
-app.use((req, res, next) => {
-  console.log(`\n[${new Date().toISOString()}] ${req.method} request to ${req.url}`);
-  console.log(`Headers Origin:`, req.headers.origin);
-  next();
-});
 
 // ========== AUTOMATIC TABLE CREATION ==========
 const initDB = async () => {
@@ -52,10 +42,8 @@ app.get("/health", async (_req, res) => {
 
 // Routes
 app.post("/todos", async (req, res, next) => {
-  console.log("➡️ POST /todos received body:", req.body);
   const description = req.body?.description?.trim();
   if (!description) {
-    console.warn("⚠️ Description is missing in request!");
     return res.status(400).json({ error: "Description is required." });
   }
 
@@ -64,7 +52,6 @@ app.post("/todos", async (req, res, next) => {
       "INSERT INTO todo (description) VALUES($1) RETURNING *",
       [description]
     );
-    console.log("✅ Successfully inserted into DB:", newTodo.rows[0]);
     return res.status(201).json(newTodo.rows[0]);
   } catch (err) {
     console.error("❌ DB Insert Failed in POST /todos:", err);
@@ -73,10 +60,8 @@ app.post("/todos", async (req, res, next) => {
 });
 
 app.get("/todos", async (_req, res, next) => {
-  console.log("➡️ Attempting to query DB for all todos...");
   try {
     const allTodos = await pool.query("SELECT * FROM todo ORDER BY todo_id DESC");
-    console.log(`✅ Successfully fetched ${allTodos.rows.length} todos from DB.`);
     return res.json(allTodos.rows);
   } catch (err) {
     console.error("❌ DB Query Failed in GET /todos:", err);
