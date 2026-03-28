@@ -7,14 +7,17 @@ const app = express();
 const PORT = Number(process.env.PORT || 5000);
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:5173";
 
+// CORS configuration – we'll also handle OPTIONS explicitly
 app.use(
   cors({
-    origin: [CLIENT_ORIGIN, "http://localhost:3000", "https://pern-todo-app-82b2.onrender.com"],
+    origin: [CLIENT_ORIGIN, "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
   })
 );
 app.use(express.json());
 
-// Request logger
+// Request logger (moved before cors? actually keep after, but OPTIONS will be handled before)
 app.use((req, res, next) => {
   console.log(`\n[${new Date().toISOString()}] ${req.method} request to ${req.url}`);
   console.log(`Headers Origin:`, req.headers.origin);
@@ -24,11 +27,8 @@ app.use((req, res, next) => {
 // ========== AUTOMATIC TABLE CREATION ==========
 const initDB = async () => {
   try {
-    // Test the database connection
     const nowResult = await pool.query('SELECT NOW()');
     console.log(`✅ Database connected – server time: ${nowResult.rows[0].now}`);
-
-    // Create the todo table if it doesn't exist
     await pool.query(`
       CREATE TABLE IF NOT EXISTS todo (
         todo_id SERIAL PRIMARY KEY,
@@ -38,7 +38,6 @@ const initDB = async () => {
     console.log('✅ Table "todo" is ready');
   } catch (err) {
     console.error('❌ Database initialization failed:', err.message);
-    // If the database is not ready, exit the process (Render will restart the service)
     process.exit(1);
   }
 };
@@ -49,7 +48,15 @@ app.get("/health", async (_req, res) => {
   res.json({ ok: true });
 });
 
-// Routes (unchanged)
+// Explicit OPTIONS handler for /todos to ensure CORS headers are set (preflight)
+app.options('/todos', (req, res) => {
+  res.set('Access-Control-Allow-Origin', CLIENT_ORIGIN);
+  res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.sendStatus(200);
+});
+
+// Routes
 app.post("/todos", async (req, res, next) => {
   console.log("➡️ POST /todos received body:", req.body);
   const description = req.body?.description?.trim();
@@ -139,9 +146,6 @@ initDB().then(() => {
     console.log(`Server has started on port ${PORT}`);
   });
 });
-
-
-
 
 
 
