@@ -1,4 +1,5 @@
-const { Pool } = require("pg");
+import pg from "pg";
+const { Pool } = pg;
 
 const pool = new Pool({
   user: process.env.PGUSER || "postgres",
@@ -8,4 +9,4 @@ const pool = new Pool({
   database: process.env.PGDATABASE || "perntodo",
 });
 
-module.exports = pool;
+export default pool;

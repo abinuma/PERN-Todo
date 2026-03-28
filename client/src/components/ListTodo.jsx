@@ -1,10 +1,7 @@
-import React, { Fragment, useEffect, useState } from "react";
-
+import React, { Fragment } from "react";
 import EditTodo from "./EditTodo.jsx";
 
-const ListTodos = () => {
-  const [todos, setTodos] = useState([]);
-
+const ListTodos = ({ todos, refreshTodos }) => {
   const deleteTodo = async (id) => {
     try {
       await fetch(
@@ -14,32 +11,15 @@ const ListTodos = () => {
         }
       );
 
-      setTodos((prev) => prev.filter((todo) => todo.todo_id !== id));
+      refreshTodos();
     } catch (err) {
       console.error(err.message);
     }
   };
-
-  const getTodos = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL ?? "http://localhost:5000"}/todos`
-      );
-      const jsonData = await response.json();
-
-      setTodos(jsonData);
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
-
-  useEffect(() => {
-    getTodos();
-  }, []);
 
   return (
     <Fragment>
-      <table className="table mt-5   mb-5 text-center todo-table">
+      <table className="table mt-5 mb-5 text-center todo-table">
         <thead>
           <tr>
             <th>Description</th>
@@ -52,7 +32,7 @@ const ListTodos = () => {
             <tr key={todo.todo_id}>
               <td>{todo.description}</td>
               <td>
-                <EditTodo todo={todo} onUpdated={getTodos} />
+                <EditTodo todo={todo} onUpdated={refreshTodos} />
               </td>
               <td>
                 <button
@@ -71,4 +51,3 @@ const ListTodos = () => {
 };
 
 export default ListTodos;
-

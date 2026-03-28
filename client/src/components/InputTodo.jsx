@@ -1,10 +1,11 @@
 import React, { Fragment, useState } from "react";
 
-const InputTodo = () => {
+const InputTodo = ({ onTodoAdded }) => {
   const [description, setDescription] = useState("");
 
   const onSubmitForm = async (e) => {
     e.preventDefault();
+    if (!description.trim()) return;
     try {
       const body = { description };
       await fetch(
@@ -17,7 +18,7 @@ const InputTodo = () => {
       );
 
       setDescription("");
-      window.location = "/";
+      onTodoAdded();
     } catch (err) {
       console.error(err.message);
     }
@@ -43,4 +44,3 @@ const InputTodo = () => {
 };
 
 export default InputTodo;
-

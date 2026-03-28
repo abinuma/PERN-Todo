@@ -11,6 +11,7 @@ const EditTodo = ({ todo, onUpdated }) => {
 
   const updateDescription = async (e) => {
     e.preventDefault();
+    if (!description.trim()) return;
     try {
       const body = { description };
       await fetch(
@@ -92,4 +93,3 @@ const EditTodo = ({ todo, onUpdated }) => {
 };
 
 export default EditTodo;
-
